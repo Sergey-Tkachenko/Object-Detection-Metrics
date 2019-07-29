@@ -120,6 +120,7 @@ def getBoundingBoxes(directory,
             if line.replace(' ', '') == '':
                 continue
             splitLine = line.split(" ")
+            bb_min_size = 0
             if isGT:
                 # idClass = int(splitLine[0]) #class
                 idClass = (splitLine[0])  # class
@@ -158,10 +159,19 @@ def getBoundingBoxes(directory,
                     BBType.Detected,
                     confidence,
                     format=bbFormat)
-            allBoundingBoxes.addBoundingBox(bb)
+
+                # if detFormat is BBFormat.XYWH:
+                #     bb_min_size = min(bb.w, bb.h)
+                # else:
+                #     bb_min_size = min(bb.h - bb.y, bb.w - bb.x)
+            bb_x, bb_y, bb_w, bb_h = bb.getAbsoluteBoundingBox(BBFormat.XYWH)
+            if min(bb_h, bb_w) > min_size:
+                allBoundingBoxes.addBoundingBox(bb)
             if idClass not in allClasses:
                 allClasses.append(idClass)
         fh1.close()
+    #for box in allBoundingBoxes.getBoundingBoxes():
+    #    print(box.getAbsoluteBoundingBox(BBFormat.XYX2Y2))
     return allBoundingBoxes, allClasses
 
 
@@ -246,6 +256,12 @@ parser.add_argument(
     dest='showPlot',
     action='store_false',
     help='no plot is shown during execution')
+parser.add_argument(
+    '-ms',
+    '--min_size',
+    default='40',
+    dest='min_size',
+    help='min size for bounding boxes')
 args = parser.parse_args()
 
 iouThreshold = args.iouThreshold
@@ -283,6 +299,13 @@ if args.savePath is not None:
     savePath = ValidatePaths(args.savePath, '-sp/--savepath', errors)
 else:
     savePath = os.path.join(currentPath, 'results')
+
+if args.min_size is not None:
+    min_size = float(args.min_size)
+else:
+    min_size = 40
+
+#print(min_size)
 # Validate savePath
 # If error, show error messages
 if len(errors) is not 0:
