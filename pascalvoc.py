@@ -93,6 +93,7 @@ def getBoundingBoxes(directory,
                      isGT,
                      bbFormat,
                      coordType,
+                     treshhold=0.3,
                      allBoundingBoxes=None,
                      allClasses=None,
                      imgSize=(0, 0)):
@@ -120,7 +121,7 @@ def getBoundingBoxes(directory,
             if line.replace(' ', '') == '':
                 continue
             splitLine = line.split(" ")
-            bb_min_size = 0
+            conf = 0
             if isGT:
                 # idClass = int(splitLine[0]) #class
                 idClass = (splitLine[0])  # class
@@ -139,6 +140,7 @@ def getBoundingBoxes(directory,
                     imgSize,
                     BBType.GroundTruth,
                     format=bbFormat)
+                conf = 1
             else:
                 # idClass = int(splitLine[0]) #class
                 idClass = (splitLine[0])  # class
@@ -159,13 +161,14 @@ def getBoundingBoxes(directory,
                     BBType.Detected,
                     confidence,
                     format=bbFormat)
+                conf = confidence
 
                 # if detFormat is BBFormat.XYWH:
                 #     bb_min_size = min(bb.w, bb.h)
                 # else:
                 #     bb_min_size = min(bb.h - bb.y, bb.w - bb.x)
             bb_x, bb_y, bb_w, bb_h = bb.getAbsoluteBoundingBox(BBFormat.XYWH)
-            if min(bb_h, bb_w) > min_size:
+            if (min(bb_h, bb_w) > min_size) & (conf > treshhold):
                 allBoundingBoxes.addBoundingBox(bb)
             if idClass not in allClasses:
                 allClasses.append(idClass)
