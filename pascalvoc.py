@@ -95,8 +95,7 @@ def getBoundingBoxes(directory,
                      coordType,
                      allBoundingBoxes=None,
                      allClasses=None,
-                     imgSize=(0, 0),
-                     treshhold=0.5):
+                     imgSize=(0, 0)):
     """Read txt files containing bounding boxes (ground truth and detections)."""
     if allBoundingBoxes is None:
         allBoundingBoxes = BoundingBoxes()
@@ -168,13 +167,14 @@ def getBoundingBoxes(directory,
                 # else:
                 #     bb_min_size = min(bb.h - bb.y, bb.w - bb.x)
             bb_x, bb_y, bb_w, bb_h = bb.getAbsoluteBoundingBox(BBFormat.XYWH)
-            if min(bb_h, bb_w) > min_size and conf > treshhold:
+            if min(bb_h, bb_w) > min_size and conf > conf_threshold:
                 allBoundingBoxes.addBoundingBox(bb)
             if idClass not in allClasses:
                 allClasses.append(idClass)
         fh1.close()
-    #for box in allBoundingBoxes.getBoundingBoxes():
-    #    print(box.getAbsoluteBoundingBox(BBFormat.XYX2Y2))
+    # for box in allBoundingBoxes.getBoundingBoxes():
+    #     print(box.getAbsoluteBoundingBox(BBFormat.XYX2Y2))
+    print(len(allBoundingBoxes.getBoundingBoxes()))
     return allBoundingBoxes, allClasses
 
 
@@ -265,6 +265,13 @@ parser.add_argument(
     default='40',
     dest='min_size',
     help='min size for bounding boxes')
+parser.add_argument(
+    '-ctr',
+    '--conf_threshold',
+    default='0.5',
+    dest='conf_threshold',
+    help='threshold for confidence filter')
+
 args = parser.parse_args()
 
 iouThreshold = args.iouThreshold
@@ -307,6 +314,12 @@ if args.min_size is not None:
     min_size = float(args.min_size)
 else:
     min_size = 40
+
+if args.conf_threshold is not None:
+    conf_threshold = float(args.conf_threshold)
+else:
+    conf_threshold = 0.5
+print(conf_threshold)
 
 #print(min_size)
 # Validate savePath
