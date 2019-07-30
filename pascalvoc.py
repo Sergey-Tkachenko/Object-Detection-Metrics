@@ -93,10 +93,10 @@ def getBoundingBoxes(directory,
                      isGT,
                      bbFormat,
                      coordType,
-                     treshhold=0.3,
                      allBoundingBoxes=None,
                      allClasses=None,
-                     imgSize=(0, 0)):
+                     imgSize=(0, 0),
+                     treshhold=0.5):
     """Read txt files containing bounding boxes (ground truth and detections)."""
     if allBoundingBoxes is None:
         allBoundingBoxes = BoundingBoxes()
@@ -168,7 +168,7 @@ def getBoundingBoxes(directory,
                 # else:
                 #     bb_min_size = min(bb.h - bb.y, bb.w - bb.x)
             bb_x, bb_y, bb_w, bb_h = bb.getAbsoluteBoundingBox(BBFormat.XYWH)
-            if (min(bb_h, bb_w) > min_size) & (conf > treshhold):
+            if min(bb_h, bb_w) > min_size and conf > treshhold:
                 allBoundingBoxes.addBoundingBox(bb)
             if idClass not in allClasses:
                 allClasses.append(idClass)
